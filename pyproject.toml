@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "channels-pytest-liveserver"
+version = "0.1.0"
+description = ""
+authors = ["Nir <88795475+nrbnlulu@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+channels = {extras = ["daphne"], version = "^4.0.0"}
+pytest = "^7.2.0"
+django-stubs = "^1.13.1"
+django = "^4.1.5"
+websockets = "^10.4"
+pytest-django = "^4.5.2"
+pytest-asyncio = "^0.20.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+asyncio_mode = "auto"
+testpaths = [
+    "tests",
+]
+DJANGO_SETTINGS_MODULE = "app.app.settings"
+python_files = "tests.py test_*.py *_tests.py"
+django_find_project = true
