@@ -12,6 +12,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import connections
 from django.test.utils import modify_settings
 
+from daphne.server import Server as DaphneServer
+from daphne.endpoints import build_endpoint_description_strings
+
+
 def make_application(*, static_wrapper):
     # Module-level function for pickle-ability
     from app.app.asgi import application
@@ -34,7 +38,9 @@ class ChannelsLiveServerProc:
                     "ChannelsLiveServer can not be used with in memory databases"
                 )
 
-        self._live_server_modified_settings = modify_settings(ALLOWED_HOSTS={"append": self.host})
+        self._live_server_modified_settings = modify_settings(
+            ALLOWED_HOSTS={"append": self.host}
+        )
         self._live_server_modified_settings.enable()
 
         get_application = partial(
@@ -59,12 +65,13 @@ class ChannelsLiveServerProc:
     @property
     def http_url(self):
         return f"http://{self.host}:{self._port}"
+
+
 @pytest.fixture
 def channels_live_server_proc(request):
     server = ChannelsLiveServerProc()
     request.addfinalizer(server.stop)
     return server
-
 
 
 def get_open_port() -> int:
@@ -77,9 +84,6 @@ def get_open_port() -> int:
     s.close()
     return port
 
-
-from daphne.server import Server as DaphneServer
-from daphne.endpoints import build_endpoint_description_strings
 
 class ChannelsLiveServerThread:
     host = "localhost"
@@ -94,7 +98,9 @@ class ChannelsLiveServerThread:
                     "ChannelsLiveServer can not be used with in memory databases"
                 )
 
-        self._live_server_modified_settings = modify_settings(ALLOWED_HOSTS={"append": self.host})
+        self._live_server_modified_settings = modify_settings(
+            ALLOWED_HOSTS={"append": self.host}
+        )
         self._live_server_modified_settings.enable()
 
         get_application = partial(
@@ -130,14 +136,17 @@ def channels_live_server_thread(request):
     server = ChannelsLiveServerThread()
     request.addfinalizer(server.stop)
     return server
+
+
 async def test_ws_proc(channels_live_server_proc, db):
     async with websockets.connect(channels_live_server_proc.url) as ws:
         await ws.send("hello")
         res = await ws.recv()
-        assert res == 'hello'
+        assert res == "hello"
+
 
 async def test_ws_thread(channels_live_server_thread, db):
     async with websockets.connect(channels_live_server_thread.url) as ws:
         await ws.send("hello")
         res = await ws.recv()
-        assert res == 'hello'
+        assert res == "hello"
